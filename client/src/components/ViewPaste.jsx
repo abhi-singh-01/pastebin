@@ -11,7 +11,12 @@ export default function ViewPaste({ pasteId, onNewPaste }) {
         const fetchPaste = async () => {
             try {
                 const response = await fetch(`${API_BASE}/api/pastes/${pasteId}`)
-                const data = await response.json()
+                const text = await response.text()
+                if (!text) {
+                    throw new Error('Server returned empty response')
+                }
+
+                const data = JSON.parse(text)
 
                 if (!response.ok) {
                     throw new Error(data.error || 'Paste not found')
@@ -19,7 +24,7 @@ export default function ViewPaste({ pasteId, onNewPaste }) {
 
                 setPaste(data)
             } catch (err) {
-                setError(err.message)
+                setError(err.message || 'Failed to connect to server')
             } finally {
                 setLoading(false)
             }

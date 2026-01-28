@@ -33,7 +33,12 @@ export default function CreatePaste({ onSuccess }) {
                 body: JSON.stringify(body),
             })
 
-            const data = await response.json()
+            const text = await response.text()
+            if (!text) {
+                throw new Error('Server returned empty response. Please try again.')
+            }
+
+            const data = JSON.parse(text)
 
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to create paste')
@@ -41,7 +46,7 @@ export default function CreatePaste({ onSuccess }) {
 
             onSuccess(data, { ttl, maxViews })
         } catch (err) {
-            setError(err.message)
+            setError(err.message || 'Failed to connect to server')
         } finally {
             setLoading(false)
         }
